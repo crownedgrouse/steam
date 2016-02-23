@@ -25,9 +25,9 @@
 -module(steam).
 -author("Eric Pailleau <steam@crownedgrouse.com>").
 
--include("steam_db.hrl").
-
 -export([facets/0, tags/0, tags/1]).
+
+-include("steam_db.hrl").
 
 %%-------------------------------------------------------------------------
 %% @doc Return list of handled tags
@@ -48,5 +48,21 @@ facets() -> lists:usort(?Facets).
 %% @end
 %%-------------------------------------------------------------------------
 
-tags(_Path) -> ok.
+tags(Path) -> 
+
+	try
+		{ok, Res} = geas:info(Path),
+		{name, Name} = lists:keyfind(name, 1, Res),
+		Calls = get(geas_calls),
+		% Search tags from function calls
+		TagsCalls = lists:flatmap(fun(X) -> [tag({call, Name, X})] end, Calls),
+		% Search tags from function exports
+		TagsExports = lists:flatmap(fun(X) -> [tag({export, Name, X})] end, []),
+		% Unique results
+		lists:flatten(lists:usort(TagsCalls ++ TagsExports))
+	catch 
+    	throw:Term -> Term;
+    	exit:Reason -> {'EXIT',Reason} ;
+    	error:Reason -> {'EXIT',{Reason,erlang:get_stacktrace()}}		
+	end.
 
