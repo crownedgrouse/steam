@@ -7,7 +7,7 @@
 
 -define(Devel, []).
 -define(Made_of, []).
--define(Interface, []).
+-define(Interface, ['interface::commandline', 'interface::daemon']).
 -define(Implemented_in, ['implemented-in::c', 'implemented-in::c++', 
                          'implemented-in::erlang', 'implemented-in::java']).
 -define(Works_with, []).
@@ -15,7 +15,8 @@
 -define(Scope, ['scope::suite', 'scope::utility', 'scope::application']).
 -define(Role, ['role::program']).
 -define(Special, []).
--define(Protocol, ['protocol::corba' , 'protocol::ftp' , 'protocol::http' , 
+-define(Protocol, ['protocol::corba' , 'protocol::db:mysql', 'protocol::db:psql',
+				   'protocol::ftp' , 'protocol::http' , 
                    'protocol::ip' , 'protocol::ipv6' , 'protocol::ldap' , 
                    'protocol::sftp' , 'protocol::snmp' , 'protocol::ssh' , 
                    'protocol::ssl' , 'protocol::telnet' , 'protocol::tftp' , 
@@ -435,12 +436,12 @@ tag({_, _, _}) -> [].
 
 -define(Facets, ['devel', 'made-of', 'interface', 'implemented-in', 'works-with',
                  'work-with-format', 'scope', 'role', 'special', 'protocol',
-                 'uitoolkit', 'web', 'network'
+                 'uitoolkit', 'web', 'network', 'use'
                 ]).
 
 -define(Tags, ?Devel ++ ?Made_of ++ ?Interface ++ ?Implemented_in ++ ?Works_with
                 ++ ?Works_with_format ++ ?Scope ++ ?Role ++ ?Special ++ ?Protocol
-                ++ ?Uitoolkit ++ ?Web ++ ?Network ).
+                ++ ?Uitoolkit ++ ?Web ++ ?Network ++ ?Use).
 
 
 

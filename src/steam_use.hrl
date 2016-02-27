@@ -5,6 +5,7 @@
 %%% Steam database for facet 'use'
 %%% @end 
 
+-define(Use,['use::analysing', 'use::converting', 'use::organizing']).
 
 %%******************************************************************************
 %% Facet: use

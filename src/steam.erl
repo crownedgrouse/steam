@@ -27,8 +27,8 @@
 
 -export([facets/0, facets/1, tags/0, tags/1]).
 
--include("steam_db.hrl").
 -include("steam_use.hrl").
+-include("steam_db.hrl").
 
 %%-------------------------------------------------------------------------
 %% @doc Return list of handled tags
