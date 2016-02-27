@@ -11,12 +11,26 @@ Reference is [Debtags](http://anonscm.debian.org/cgit/debtags/vocabulary.git/tre
 ## API ##
 
 ### Listing facets ###
-[Facets](https://en.wikipedia.org/wiki/Faceted_classification)
+Debian tag classification use [Facets](https://en.wikipedia.org/wiki/Faceted_classification).
+
+Listing all facets :
+```
+1> steam:facets().
+```
 
 ### Listing tags ###
 
-### Search tags on a project ###
+Listing available tags :
+```
+1> steam:tags().
+```
 
+### Search tags in a project ###
+
+Extracting Debian tags use `steam:tags/1`. Argument is the path to the Erlang project root directory.
+```
+1> steam:tags("/path/to/root/project/directory/").
+```
 
 ## Quick Start ##
 
