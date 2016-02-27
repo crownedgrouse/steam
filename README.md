@@ -8,7 +8,17 @@ Debian package tags are used because of their completeness compared to many othe
 
 Reference is [Debtags](http://anonscm.debian.org/cgit/debtags/vocabulary.git/tree/debian-packages).
 
+All relevant tags for Erlang projects are automatically detected from abstract code, except tags of facet `use`.
+This subjective facet cannot be detected for now and to be declared by projects maintainers.
+
+## Contributing ##
+
+Contributions are welcome. Please use pull-requests.
+
+Facet `use` (The general purpose of the software) is to be informed by Erlang projects maintainer in `src/steam_use.hrl`. 
+
 ## API ##
+
 ### Search tags in a project ###
 
 Extracting Debian tags use `steam:tags/1`. 
@@ -50,7 +60,5 @@ cd steam
 make shell
 ```
 
-## Contributing ##
 
-Contributions are welcome. Please use pull-requests.
 
