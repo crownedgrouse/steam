@@ -12,11 +12,16 @@ Reference is [Debtags](http://anonscm.debian.org/cgit/debtags/vocabulary.git/tre
 ### Search tags in a project ###
 
 Extracting Debian tags use `steam:tags/1`. 
+
 Argument is the path to the Erlang project root directory.
+
 Returns `{ok, ListOfTags}` or `{error, Reason}`.
 
 ```
 1> steam:tags("/path/to/root/project/directory/").
+{ok,['implemented-in::erlang','protocol::ip',
+     'protocol::ssh','scope::suite','use::organizing']}
+
 ```
 
 ### Listing facets ###
