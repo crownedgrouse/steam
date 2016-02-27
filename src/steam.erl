@@ -62,6 +62,10 @@ facets(all) -> lists:usort(?Facets).
 tags(Path) -> 
 
 	try
+		% Clean up
+		put(geas_calls, undefined), 
+		put(geas_exports, undefined), 
+        % Get infos
 		{ok, Res} = geas:info(Path),
 		% Extract some needed informations
 		{name, RawName} = lists:keyfind(name, 1, Res),
@@ -74,21 +78,24 @@ tags(Path) ->
 					 undefined -> [] ;
 					 Call -> Call
 				end,
+		{type, Type} = lists:keyfind(type, 1, Res),
 
 		% Search tags from function calls
 		TagsCalls = lists:flatmap(fun(X) -> [tag({call, Name, X})] end, Calls),
 
+		Exports = case get(geas_exports) of
+					 undefined -> [] ;
+					 Exp -> Exp
+				  end,
 		% Search tags from function exports
-		TagsExports = lists:flatmap(fun(X) -> [tag({export, Name, X})] end, []),
+		TagsExports = lists:flatmap(fun({M, L}) -> lists:flatmap(fun({F, A}) -> [tag({export, Name, {M, F, A}})] end, L) end, Exports),
 
         % Search tags from other geas information
         TagsApp = [tag({application, Name, []}),
+				   tag({application, Name, {type, Type}}),
 				   implemented_in(Driver, Path),
 				   use(Name)
-				  ],
-
-		% Clean up
-		put(geas_calls, undefined), 
+				  ],		
 
 		% Unique results
 		{ok, lists:usort(lists:flatten(['implemented-in::erlang'] ++ [TagsCalls] ++ [TagsExports] ++ [TagsApp]))}
@@ -150,8 +157,44 @@ implemented_in(true, Path) ->
 				 {[], _} -> [] ;
 				 {_, _}  -> ['implemented-in::java']
 			   end,
+		%%******************************************************************************
+		%% Facet: works-with-format
+		%% Description: Supports Format
+		%%  Which data formats are supported by the package
+
+		% Tag: works-with-format::json
+		% Description: JSON
+		%  JavaScript Object Notation
+
+		Json_Ext = ['.json'],
+		Json = case lists:partition(fun(X) -> lists:member(X, Json_Ext) end, Exts) of
+				 {[], _} -> [] ;
+				 {_, _}  -> ['works-with-format::json']
+			   end,
+
+		% Tag: works-with-format::xml
+		% Description: XML
+        XML_Ext = ['.xml'],
+		XML = case lists:partition(fun(X) -> lists:member(X, XML_Ext) end, Exts) of
+				 {[], _} -> [] ;
+				 {_, _}  -> ['works-with-format::xml']
+			   end,
+		% Tag: works-with-format::xml:xslt
+		% Description: XSL Transformations (XSLT)
+        XSL_Ext = ['.xsl'],
+		XSL = case lists:partition(fun(X) -> lists:member(X, XSL_Ext) end, Exts) of
+				 {[], _} -> [] ;
+				 {_, _}  -> ['works-with-format::xml:xslt']
+			   end,
+		% Tag: works-with-format::zip
+		% Description: Zip Archives
+        Zip_Ext = ['.zip'],
+		Zip = case lists:partition(fun(X) -> lists:member(X, Zip_Ext) end, Exts) of
+				 {[], _} -> [] ;
+				 {_, _}  -> ['works-with-format::zip']
+			   end,
         % Result
-		C ++ Cpp ++ Java;
+		C ++ Cpp ++ Java ++ Json ++ XML ++ XSL ++ Zip;
 
 implemented_in(false, _) -> [].
 

@@ -149,11 +149,14 @@
 
 % Tag: interface::commandline
 % Description: Command Line
+tag({application, _, {type, esc}}) -> 'interface::commandline' ;
 
 % Tag: interface::daemon
 % Description: Daemon
 %  Runs in background, only a control interface is provided, usually on
 %  commandline.
+tag({application, _, {type, otp}}) -> 'interface::daemon' ;
+tag({application, _, {type, app}}) -> 'interface::daemon' ;
 
 % Tag: interface::graphical
 % Description: Graphical User Interface
@@ -195,24 +198,6 @@
 % Description: Network Traffic
 %  Routers, shapers, sniffers, firewalls and other tools
 %  that work with a stream of network packets.
-
-%%******************************************************************************
-%% Facet: works-with-format
-%% Description: Supports Format
-%%  Which data formats are supported by the package
-
-% Tag: works-with-format::json
-% Description: JSON
-%  JavaScript Object Notation
-
-% Tag: works-with-format::xml
-% Description: XML
-
-% Tag: works-with-format::xml:xslt
-% Description: XSL Transformations (XSLT)
-
-% Tag: works-with-format::zip
-% Description: Zip Archives
 
 %%******************************************************************************
 %% Facet: scope
@@ -270,7 +255,6 @@ tag({call, _, {application, start, 1}}) -> 'scope::suite' ;
 %  Shared libraries used by one or more programs.
 % NOTE : Erlang module
 
-
 %%******************************************************************************
 %% Facet: special
 %% Description: Service tags
@@ -296,10 +280,12 @@ tag({call, _, {corba_object, _, _}}) -> 'protocol::corba' ;
 % Tag: protocol::db:mysql
 % Description: MySQL
 %  Protocol for accessing MySQL database server.
+tag({call, _, {emysql, _, _}})      -> 'protocol::db:mysql';
 
 % Tag: protocol::db:psql
 % Description: PostgreSQL
 %  Protocol for accessing PostgreSQL database server.
+tag({call, _, {epgsql, _, _}})      -> 'protocol::db:psql';
 
 % Tag: protocol::ftp
 % Description: FTP
@@ -381,6 +367,9 @@ tag({call, _, {unix_telnet, _, _}})           -> 'protocol::telnet' ;
 % Description: TCP
 %  Transport Control Protocol, a core protocol of the Internet protocol suite
 %  and used for data transport.
+tag({call, _, {gen_tcp, _, _}})       -> 'protocol::tcp' ;
+tag({call, _, {megaco_tcp, _, _}})    -> 'protocol::tcp' ;
+tag({call, _, {diameter_tcp, _, _}})  -> 'protocol::tcp' ;
 
 % Tag: protocol::tftp
 % Description: TFTP
