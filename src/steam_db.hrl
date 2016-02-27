@@ -5,10 +5,10 @@
 %%% Steam database 
 %%% @end 
 
--define(Devel, ['devel::lang:erlang']).
+-define(Devel, []).
 -define(Made_of, []).
 -define(Interface, []).
--define(Implemented_in, []).
+-define(Implemented_in, ['implemented-in::c', 'implemented-in::c++', 'implemented-in::erlang', 'implemented-in::java']).
 -define(Works_with, []).
 -define(Works_with_format,[]).
 -define(Scope, ['scope::suite', 'scope::utility', 'scope::application']).
@@ -19,7 +19,7 @@
 -define(Web,[]).
 -define(Network,[]).
 
--spec tags({call | export , {atom(), atom(), integer()}}) -> atom() | [].
+-spec tags({call | export | application , {atom(), atom(), integer()}}) -> atom() | [].
 %%******************************************************************************
 %% Facet: devel
 %% Description: Software Development
@@ -162,23 +162,6 @@
 
 % Tag: interface::web
 % Description: World Wide Web
-
-%%******************************************************************************
-%% Facet: implemented-in
-%% Description: Implemented in
-%%  What language the software is implemented in
-
-% Tag: implemented-in::c
-% Description: C
-
-% Tag: implemented-in::c++
-% Description: C++
-
-% Tag: implemented-in::erlang
-% Description: Erlang
-
-% Tag: implemented-in::java
-% Description: Java
 
 %%******************************************************************************
 %% Facet: works-with
@@ -545,10 +528,19 @@ tag({call, _, {wx, _, _}})          -> 'uitoolkit::wxwidgets' ;
 % Tag: web::application
 % Description: Application
 % NOTE : application depending of usual Erlang web-servers
+tag({call, _, {inets, _, _}})      -> 'web::application';
+tag({call, _, {cowboy, _, _}})     -> 'web::application';
+tag({call, _, {mochiweb, _, _}})   -> 'web::application';
+tag({call, _, {webmachine, _, _}}) -> 'web::application';
+tag({call, _, {yaws, _, _}})       -> 'web::application';
 
 % Tag: web::server
 % Description: Server
 % NOTE : already knowned Erlang webservers
+tag({application, cowboy, _})     -> 'web::server' ;
+tag({application, mochiweb, _})   -> 'web::server' ;
+tag({application, webmachine, _}) -> 'web::server' ;
+tag({application, yaws, _})       -> 'web::server' ;
 
 %%******************************************************************************
 %% Facet: network
