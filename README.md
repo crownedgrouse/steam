@@ -37,13 +37,13 @@ Returns `{ok, ListOfTags}` or `{error, Reason}`.
 ### Listing facets ###
 Debian tag classification use [Facets](https://en.wikipedia.org/wiki/Faceted_classification).
 
-Listing facets used in tags : `1> steam:facets().`
+Listing facets used in tags : `steam:facets().`
 
-Listing all potential facets : `1> steam:facets(all).`
+Listing all potential facets : `steam:facets(all).`
 
 ### Listing tags ###
 
-Listing available tags : `1> steam:tags().`
+Listing available tags : `steam:tags().`
 
 ## Quick Start ##
 
