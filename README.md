@@ -4,9 +4,9 @@ Search Tags in Erlang Application or Module
 ## Overview ##
 `steam` is a module detecting Debian package tags on Erlang projects. 
 
-Debian package tags are used because of their completeness compared of many other distributions. However those tags can be easily transcoded to anothers if needed.
+Debian package tags are used because of their completeness compared to many other distributions. However those tags can be easily transcoded to anothers if needed.
 
-Reference is [Debtags](http://anonscm.debian.org/cgit/debtags/vocabulary.git/tree/debian-packages)
+Reference is [Debtags](http://anonscm.debian.org/cgit/debtags/vocabulary.git/tree/debian-packages).
 
 ## API ##
 ### Search tags in a project ###
