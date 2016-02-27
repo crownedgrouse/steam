@@ -17,6 +17,8 @@ Contributions are welcome. Please use pull-requests.
 
 Facet `use` (The general purpose of the software) is to be informed by Erlang projects maintainer in `src/steam_use.hrl`. 
 
+Note : only pull requests coming from owner of project will be accepted for this facet `use`.
+
 ## API ##
 
 ### Search tags in a project ###
