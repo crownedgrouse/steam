@@ -9,13 +9,28 @@ Debian package tags are used because of their completeness compared of many othe
 Reference is [Debtags](http://anonscm.debian.org/cgit/debtags/vocabulary.git/tree/debian-packages)
 
 ## API ##
+### Search tags in a project ###
+
+Extracting Debian tags use `steam:tags/1`. 
+Argument is the path to the Erlang project root directory.
+Returns `{ok, ListOfTags}` or `{error, Reason}`.
+
+```
+1> steam:tags("/path/to/root/project/directory/").
+```
 
 ### Listing facets ###
 Debian tag classification use [Facets](https://en.wikipedia.org/wiki/Faceted_classification).
 
-Listing all facets :
+Listing facets used in tags :
 ```
 1> steam:facets().
+```
+
+Listing all potential facets :
+
+```
+1> steam:facets(all).
 ```
 
 ### Listing tags ###
@@ -23,13 +38,6 @@ Listing all facets :
 Listing available tags :
 ```
 1> steam:tags().
-```
-
-### Search tags in a project ###
-
-Extracting Debian tags use `steam:tags/1`. Argument is the path to the Erlang project root directory.
-```
-1> steam:tags("/path/to/root/project/directory/").
 ```
 
 ## Quick Start ##

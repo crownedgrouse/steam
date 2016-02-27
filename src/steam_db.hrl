@@ -8,15 +8,20 @@
 -define(Devel, []).
 -define(Made_of, []).
 -define(Interface, []).
--define(Implemented_in, ['implemented-in::c', 'implemented-in::c++', 'implemented-in::erlang', 'implemented-in::java']).
+-define(Implemented_in, ['implemented-in::c', 'implemented-in::c++', 
+                         'implemented-in::erlang', 'implemented-in::java']).
 -define(Works_with, []).
 -define(Works_with_format,[]).
 -define(Scope, ['scope::suite', 'scope::utility', 'scope::application']).
 -define(Role, ['role::program']).
 -define(Special, []).
--define(Protocol, []).
--define(Uitoolkit,[]).
--define(Web,[]).
+-define(Protocol, ['protocol::corba' , 'protocol::ftp' , 'protocol::http' , 
+                   'protocol::ip' , 'protocol::ipv6' , 'protocol::ldap' , 
+                   'protocol::sftp' , 'protocol::snmp' , 'protocol::ssh' , 
+                   'protocol::ssl' , 'protocol::telnet' , 'protocol::tftp' , 
+                   'protocol::udp']).
+-define(Uitoolkit,['uitoolkit::wxwidgets']).
+-define(Web,['web::application', 'web::server']).
 -define(Network,[]).
 
 -spec tags({call | export | application , {atom(), atom(), integer()}}) -> atom() | [].
@@ -401,123 +406,6 @@ tag({call, _, {megaco_udp, _, _}})          -> 'protocol::udp' ;
 % Tag: uitoolkit::wxwidgets
 % Description: wxWidgets
 tag({call, _, {wx, _, _}})          -> 'uitoolkit::wxwidgets' ;
-
-%%******************************************************************************
-%% Facet: use
-%% Description: Purpose
-%%  The general purpose of the software
-%% NOTE : probably not automatisable. Keep for memory for now.
-%-define('use',[]).
-
-% Tag: use::analysing
-% Description: Analysing
-%  Software for turning data into knowledge.
-
-% Tag: use::browsing
-% Description: Browsing
-
-% Tag: use::calculating
-% Description: Calculating
-
-% Tag: use::chatting
-% Description: Chatting
-
-% Tag: use::checking
-% Description: Checking
-%  All sorts of checking, checking a filesystem for validity, checking
-%  a document for incorrectly spelled words, checking a network for
-%  routing problems. Verifying.
-
-% Tag: use::comparing
-% Description: Comparing
-%  To find what relates or differs in two or more objects.
-
-% Tag: use::compressing
-% Description: Compressing
-
-% Tag: use::configuring
-% Description: Configuration
-
-% Tag: use::converting
-% Description: Data Conversion
-
-% Tag: use::dialing
-% Description: Dialup Access
-
-% Tag: use::downloading
-% Description: Downloading
-
-% Tag: use::driver
-% Description: Hardware Driver
-
-% Tag: use::editing
-% Description: Editing
-
-% Tag: use::entertaining
-% Description: Entertaining
-
-% Tag: use::filtering
-% Description: Filtering
-
-% Tag: use::gameplaying
-% Description: Game Playing
-
-% Tag: use::learning
-% Description: Learning
-
-% Tag: use::login
-% Description: Login
-
-% Tag: use::measuring
-% Description: Measuring
-
-% Tag: use::monitor
-% Description: Monitoring
-
-% Tag: use::organizing
-% Description: Data Organisation
-
-% Tag: use::playing
-% Description: Playing Media
-
-% Tag: use::printing
-% Description: Printing
-
-% Tag: use::proxying
-% Description: Proxying
-
-% Tag: use::routing
-% Description: Routing
-
-% Tag: use::searching
-% Description: Searching
-
-% Tag: use::scanning
-% Description: Scanning
-
-% Tag: use::simulating
-% Description: Simulating
-
-% Tag: use::storing
-% Description: Storing
-
-% Tag: use::synchronizing
-% Description: Synchronisation
-
-% Tag: use::timekeeping
-% Description: Time and Clock
-
-% Tag: use::transmission
-% Description: Transmission
-
-% Tag: use::typesetting
-% Description: Typesetting
-
-% Tag: use::viewing
-% Description: Data Visualization
-
-% Tag: use::text-formatting
-% Description: Text Formatting
 
 
 %%******************************************************************************

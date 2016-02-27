@@ -25,9 +25,10 @@
 -module(steam).
 -author("Eric Pailleau <steam@crownedgrouse.com>").
 
--export([facets/0, tags/0, tags/1]).
+-export([facets/0, facets/1, tags/0, tags/1]).
 
 -include("steam_db.hrl").
+-include("steam_use.hrl").
 
 %%-------------------------------------------------------------------------
 %% @doc Return list of handled tags
@@ -41,7 +42,17 @@ tags() -> lists:usort(?Tags).
 %% @end
 %%-------------------------------------------------------------------------
 
-facets() -> lists:usort(?Facets).
+facets() -> lists:usort(lists:flatmap(fun(X) ->  Y = atom_to_list(X),
+									 [F | _] = string:tokens(Y, ":" ),
+							         [list_to_atom(F)]
+						  end, tags())).
+
+%%-------------------------------------------------------------------------
+%% @doc Return all facets
+%% @end
+%%-------------------------------------------------------------------------
+
+facets(all) -> lists:usort(?Facets).
 
 %%-------------------------------------------------------------------------
 %% @doc Return tags found in a Erlang application root path
@@ -72,7 +83,8 @@ tags(Path) ->
 
         % Search tags from other geas information
         TagsApp = [tag({application, Name, []}),
-				   implemented_in(Driver, Path)
+				   implemented_in(Driver, Path),
+				   use(Name)
 				  ],
 
 		% Clean up
