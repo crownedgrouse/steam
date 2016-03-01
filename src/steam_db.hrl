@@ -245,6 +245,8 @@ tag({call, _, {application, start, 1}}) -> 'scope::suite' ;
 %  Add-on, pluggable program fragments enhancing functionality
 %  of some program or system.
 % NOTE : erlang.mk/rebar plugin
+tag({export, Name, {Name, Name, 2}}) -> 'role::plugin' ;
+tag({export, Name, {Name, do, 1}})   -> 'role::plugin' ;
 
 % Tag: role::program
 % Description: Program

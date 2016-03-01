@@ -27,10 +27,16 @@
 
 -export([facets/0, facets/1, tags/0, tags/1]).
 
+% Special transcoding
+-export([tags/2]).
+
 -include("steam_use.hrl").
 -include("steam_db.hrl").
 
 -define(EXIST(A, L), lists:member(A, L)).
+
+% Include special semantic there
+-include("steam_erlang-mk.hrl").
 
 %%-------------------------------------------------------------------------
 %% @doc Return list of handled tags
@@ -69,6 +75,7 @@ tags(Path) ->
 		put(geas_exports, []), 
         % Get infos
 		{ok, I} = geas:info(Path),
+		put(steam_infos, I),
         % Parent calls
 		PC = get(geas_calls),
         % Parent exports
@@ -126,10 +133,19 @@ tags(Path) ->
 -spec implemented_in( list()) -> list().
 
 implemented_in(Path) -> 
-		% Get all files extensions
-		AllExts = filelib:fold_files(Path, "[A-Za-z0-9].*", true, fun(X, AccIn) -> AccIn ++ [list_to_atom(filename:extension(X))] end, []),
+		% Get all files extensions in non cached directories under root
+		AllFile1 = filelib:wildcard("*", Path),
+		AllDir1  = lists:filter(fun(X) -> (filelib:is_dir(filename:join(Path, X)) and (string:sub_string(X,1,1) /= "." )) end , AllFile1) ,
+
+		AllExts = lists:flatmap(fun(D) -> 
+				                filelib:fold_files(filename:join(Path,D), 
+												   "[A-Za-z0-9].*", 
+												   true, 
+                                                   fun(X, AccIn) -> AccIn ++ [list_to_atom(filename:extension(X))] end, [])
+				                end, AllDir1),
+
 		Exts = lists:usort(lists:flatten(AllExts)),
-			
+
 		%%******************************************************************************
 		%% Facet: implemented-in
 		%% Description: Implemented in
@@ -223,23 +239,30 @@ hooks(T, I, {_PE, PC}, {DE, _DC}) ->
 		   	% Hook : detect client/server when both found
 		   	NC = ?EXIST('network::client', T),
 		   	NS = ?EXIST('network::server', T),
+
+	   		{description, Desc} = lists:keyfind(description, 1, I),
+            % Analyse description
+			D= case Desc of 
+				 undefined ->  [] ;	
+				 _ -> Tokens = string:tokens(Desc," "),
+		    		  Toks = lists:flatmap(fun(X) -> [string:to_lower(X)] end, Tokens),
+		    		  PH = case lists:member("http", Toks) of
+							true -> ['protocol::http'] ;
+							false -> []
+		       		  	   end,
+					  PF = case lists:member("ftp", Toks) of
+							true -> ['protocol::ftp'] ;
+							false -> []
+		       		  	   end,
+					  PH ++ PF
+			   end,
+            % 
 		   	% If both network::client and network::server, 
 		   	% try to discriminate otherwise remove both instead giving wrong infos		
 			% If there is 'connect' in parent calls and in deps exports, it is a client
 			Client  = (lists:keymember(connect, 2, PC) and lists:keymember(connect, 2, DE)),
 			% If there is 'listen'  in parent calls and in deps exports, it is a server
 			Server  = (lists:keymember(listen, 2, PC) and lists:keymember(listen, 2, DE)),
-
-	   		{description, Desc} = lists:keyfind(description, 1, I),
-			D= case Desc of 
-				 undefined ->  [] ;	
-				 _ -> Tokens = string:tokens(Desc," "),
-		    		  Toks = lists:flatmap(fun(X) -> [string:to_lower(X)] end, Tokens),
-		    		  case lists:member("http", Toks) of
-							true -> ['protocol::http'] ;
-							false -> []
-		       			 end
-			   end,
 		   	H= case (NC and NS) of	
 				true -> 
 						case (Client and Server) of
@@ -248,11 +271,15 @@ hooks(T, I, {_PE, PC}, {DE, _DC}) ->
 										true  -> % remove Server
 												 T -- ['network::server'] ;
 										false -> % remove Client
-												 T -- ['network::client'] 
+												 case Server of
+													true  -> T -- ['network::client'] ;
+													false -> T -- ['network::server', 'network::client']
+												 end
 									 end
 						end;
 				false -> T
 		      end,
+		   % Final result
 		   H ++ D.
 
 
