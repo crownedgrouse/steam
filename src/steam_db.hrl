@@ -257,6 +257,19 @@ tag({call, _, {application, start, 1}}) -> 'scope::suite' ;
 % NOTE : Erlang module
 
 %%******************************************************************************
+%% Facet: network
+%% Description: Networking
+%%  Role performed concerning computer networks
+
+% Tag: network::client
+% Description: Client
+tag({call, _, {gen_tcp, connect, _}})       -> 'network::client' ;
+
+% Tag: network::server
+% Description: Server
+tag({call, _, {gen_tcp, listen, _}})       -> 'network::server' ;
+
+%%******************************************************************************
 %% Facet: special
 %% Description: Service tags
 %%  Group of special tags
@@ -414,22 +427,12 @@ tag({call, _, {yaws, _, _}})       -> 'web::application';
 
 % Tag: web::server
 % Description: Server
-% NOTE : already knowned Erlang webservers
+% NOTE : already well known Erlang webservers
 tag({application, cowboy, _})     -> 'web::server' ;
 tag({application, mochiweb, _})   -> 'web::server' ;
 tag({application, webmachine, _}) -> 'web::server' ;
 tag({application, yaws, _})       -> 'web::server' ;
 
-%%******************************************************************************
-%% Facet: network
-%% Description: Networking
-%%  Role performed concerning computer networks
-
-% Tag: network::client
-% Description: Client
-
-% Tag: network::server
-% Description: Server
 
 %%******************************************************************************
 tag({_, _, _}) -> [].

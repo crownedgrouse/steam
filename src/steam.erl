@@ -15,7 +15,7 @@
 %%% WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
 %%% WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
 %%% AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
-%%% CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+%%% CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER IULTING FROM
 %%% LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
 %%% NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 %%% CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
@@ -29,6 +29,8 @@
 
 -include("steam_use.hrl").
 -include("steam_db.hrl").
+
+-define(EXIST(A, L), lists:member(A, L)).
 
 %%-------------------------------------------------------------------------
 %% @doc Return list of handled tags
@@ -63,42 +65,54 @@ tags(Path) ->
 
 	try
 		% Clean up
-		put(geas_calls, undefined), 
-		put(geas_exports, undefined), 
+		put(geas_calls, []), 
+		put(geas_exports, []), 
         % Get infos
-		{ok, Res} = geas:info(Path),
+		{ok, I} = geas:info(Path),
+        % Parent calls
+		PC = get(geas_calls),
+        % Parent exports
+		PE = get(geas_exports),
+        % Search inheritance
+		_Comp = geas:compat(Path, global),
+        % All calls
+		AC = get(geas_calls),
+        % All exports
+		AE = get(geas_exports),
+		% Deps only call
+		DC = AC -- PC,
+		% Deps only exports
+		DE = AE -- PE,
 		% Extract some needed informations
-		{name, RawName} = lists:keyfind(name, 1, Res),
+		{name, RawName} = lists:keyfind(name, 1, I),
 		Name = case RawName  of
 					undefined -> list_to_atom(filename:basename(Path)) ;
 					_  -> RawName
 			   end,
-		{driver, Driver} = lists:keyfind(driver, 1, Res),
-		Calls = case get(geas_calls) of
-					 undefined -> [] ;
-					 Call -> Call
-				end,
-		{type, Type} = lists:keyfind(type, 1, Res),
+		{driver, Driver} = lists:keyfind(driver, 1, I),
 
-		% Search tags from function calls
-		TagsCalls = lists:flatmap(fun(X) -> [tag({call, Name, X})] end, Calls),
+		{type, Type} = lists:keyfind(type, 1, I),
 
-		Exports = case get(geas_exports) of
-					 undefined -> [] ;
-					 Exp -> Exp
-				  end,
-		% Search tags from function exports
-		TagsExports = lists:flatmap(fun({M, L}) -> lists:flatmap(fun({F, A}) -> [tag({export, Name, {M, F, A}})] end, L) end, Exports),
+		% Search tags from Parent function calls
+		TPC = lists:flatmap(fun(X) -> [tag({call, Name, X})] end, PC),
+
+		% Search tags from Parent function exports
+		TPE = lists:flatmap(fun(X) -> [tag({export, Name, X})] end, PE),
+
+		% Search tags from deps function calls
+		TDC = lists:flatmap(fun(X) -> [tag({call, deps, X})] end, DC),
+
+		% Search tags from deps function exports
+		TDE = lists:flatmap(fun(X) -> [tag({export, deps, X})] end, DE),
 
         % Search tags from other geas information
-        TagsApp = [tag({application, Name, []}),
+        TA = [tag({application, Name, []}),
 				   tag({application, Name, {type, Type}}),
 				   implemented_in(Driver, Path),
 				   use(Name)
-				  ],		
-
-		% Unique results
-		{ok, lists:usort(lists:flatten(['implemented-in::erlang'] ++ [TagsCalls] ++ [TagsExports] ++ [TagsApp]))}
+		     ],		
+		% Unique Iults
+		{ok, lists:usort(hooks(lists:flatten([TPC] ++ [TPE] ++ [TDC] ++ [TDE] ++ [TA]), I, {PE, PC}, {DE, DC}))}
 	catch 
     	throw:Term -> Term;
     	exit:Reason -> {error, Reason} ;
@@ -148,6 +162,11 @@ implemented_in(true, Path) ->
 		% Tag: implemented-in::erlang
 		% Description: Erlang
 		% NOTE : by default if valid Erlang project
+		E_Ext = ['.erl', '.hrl'],
+		E = case lists:partition(fun(X) -> lists:member(X, E_Ext) end, Exts) of
+				 {[], _} -> [] ;
+				 {_, _}  -> ['implemented-in::erlang'] 
+			end,
 
 		% Tag: implemented-in::java
 		% Description: Java
@@ -194,8 +213,45 @@ implemented_in(true, Path) ->
 				 {_, _}  -> ['works-with-format::zip']
 			   end,
         % Result
-		C ++ Cpp ++ Java ++ Json ++ XML ++ XSL ++ Zip;
+		C ++ Cpp ++ E ++ Java ++ Json ++ XML ++ XSL ++ Zip;
 
 implemented_in(false, _) -> [].
+
+%%-------------------------------------------------------------------------
+%% @doc Hooks on first Results
+%% @end
+%%-------------------------------------------------------------------------
+hooks(T, I, {_PE, PC}, {DE, _DC}) ->  
+		   	% Hook : detect client/server when both found
+		   	NC = ?EXIST('network::client', T),
+		   	NS = ?EXIST('network::server', T),
+		   	% If both network::client and network::server, 
+		   	% try to discriminate otherwise remove both instead giving wrong infos		
+			% If there is 'connect' in parent calls and in deps exports, it is a client
+			Client  = (lists:keymember(connect, 2, PC) and lists:keymember(connect, 2, DE)),
+			% If there is 'listen'  in parent calls and in deps exports, it is a server
+			Server  = (lists:keymember(listen, 2, PC) and lists:keymember(listen, 2, DE)),
+
+	   		{description, Desc} = lists:keyfind(description, 1, I),
+		    Tokens = string:tokens(Desc," "),
+		    Toks = lists:flatmap(fun(X) -> [string:to_lower(X)] end, Tokens),
+		    D= case lists:member("http", Toks) of
+				true -> ['protocol::http'] ;
+				false -> []
+		       end,
+		   	H= case (NC and NS) of	
+				true -> 
+						case (Client and Server) of
+							true -> T ;
+							false -> case Client of
+										true  -> % remove Server
+												 T -- ['network::server'] ;
+										false -> % remove Client
+												 T -- ['network::client'] 
+									 end
+						end;
+				false -> T
+		      end,
+		   H ++ D.
 
 
