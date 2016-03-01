@@ -89,7 +89,7 @@ tags(Path) ->
 					undefined -> list_to_atom(filename:basename(Path)) ;
 					_  -> RawName
 			   end,
-		{driver, Driver} = lists:keyfind(driver, 1, I),
+		{driver, _Driver} = lists:keyfind(driver, 1, I),
 
 		{type, Type} = lists:keyfind(type, 1, I),
 
@@ -108,7 +108,7 @@ tags(Path) ->
         % Search tags from other geas information
         TA = [tag({application, Name, []}),
 				   tag({application, Name, {type, Type}}),
-				   implemented_in(Driver, Path),
+				   implemented_in(Path),
 				   use(Name)
 		     ],		
 		% Unique Iults
@@ -123,11 +123,11 @@ tags(Path) ->
 %% @doc Return tags from informations not coming from Abstract Code
 %% @end
 %%-------------------------------------------------------------------------
--spec implemented_in(boolean(), list()) -> atom() | [].
+-spec implemented_in( list()) -> list().
 
-implemented_in(true, Path) -> 
+implemented_in(Path) -> 
 		% Get all files extensions
-		AllExts = filelib:fold_files(Path, ".*", true, fun(X, AccIn) -> AccIn ++ [list_to_atom(filename:extension(X))] end, []),
+		AllExts = filelib:fold_files(Path, "[A-Za-z0-9].*", true, fun(X, AccIn) -> AccIn ++ [list_to_atom(filename:extension(X))] end, []),
 		Exts = lists:usort(lists:flatten(AllExts)),
 			
 		%%******************************************************************************
@@ -213,9 +213,7 @@ implemented_in(true, Path) ->
 				 {_, _}  -> ['works-with-format::zip']
 			   end,
         % Result
-		C ++ Cpp ++ E ++ Java ++ Json ++ XML ++ XSL ++ Zip;
-
-implemented_in(false, _) -> [].
+		C ++ Cpp ++ E ++ Java ++ Json ++ XML ++ XSL ++ Zip.
 
 %%-------------------------------------------------------------------------
 %% @doc Hooks on first Results
@@ -233,12 +231,15 @@ hooks(T, I, {_PE, PC}, {DE, _DC}) ->
 			Server  = (lists:keymember(listen, 2, PC) and lists:keymember(listen, 2, DE)),
 
 	   		{description, Desc} = lists:keyfind(description, 1, I),
-		    Tokens = string:tokens(Desc," "),
-		    Toks = lists:flatmap(fun(X) -> [string:to_lower(X)] end, Tokens),
-		    D= case lists:member("http", Toks) of
-				true -> ['protocol::http'] ;
-				false -> []
-		       end,
+			D= case Desc of 
+				 undefined ->  [] ;	
+				 _ -> Tokens = string:tokens(Desc," "),
+		    		  Toks = lists:flatmap(fun(X) -> [string:to_lower(X)] end, Tokens),
+		    		  case lists:member("http", Toks) of
+							true -> ['protocol::http'] ;
+							false -> []
+		       			 end
+			   end,
 		   	H= case (NC and NS) of	
 				true -> 
 						case (Client and Server) of
