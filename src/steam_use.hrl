@@ -18,7 +18,6 @@
 % Description: Analysing
 %  Software for turning data into knowledge.
 use(geas)  -> 'use::analysing' ;
-use(steam) -> 'use::analysing' ;
 
 % Tag: use::browsing
 % Description: Browsing

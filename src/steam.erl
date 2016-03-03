@@ -24,6 +24,9 @@
 %%%-------------------------------------------------------------------
 -module(steam).
 -author("Eric Pailleau <steam@crownedgrouse.com>").
+-steam([{tag,['use::analysing']},
+		{untag,[]}
+	   ]).
 
 -export([facets/0, facets/1, tags/0, tags/1]).
 

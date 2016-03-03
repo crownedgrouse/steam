@@ -3,6 +3,8 @@
 %% @end
 %%-------------------------------------------------------------------------
 tags('scope::suite', 'erlang-mk') -> 'erlang::otp:suite' ;
+tags('implemented-in::c', 'erlang-mk') -> 'erlang::driver:c' ;
+tags('implemented-in::c++', 'erlang-mk') -> 'erlang::driver:c++' ;
 
 tags('interface::daemon', 'erlang-mk') -> 
 	% depending geas type
