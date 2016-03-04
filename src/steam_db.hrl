@@ -257,6 +257,7 @@ tag({export, Name, {Name, do, 1}})   -> 'role::plugin' ;
 % Description: Shared Library
 %  Shared libraries used by one or more programs.
 % NOTE : Erlang module
+tag({application, _, {type, lib}}) -> 'role::shared-lib' ;
 
 %%******************************************************************************
 %% Facet: network

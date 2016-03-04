@@ -93,6 +93,7 @@ tags(Path) ->
 		DC = AC -- PC,
 		% Deps only exports
 		DE = AE -- PE,
+
 		% Extract some needed informations
 		{name, RawName} = lists:keyfind(name, 1, I),
 		Name = case RawName  of
@@ -231,8 +232,15 @@ implemented_in(Path) ->
 				 {[], _} -> [] ;
 				 {_, _}  -> ['works-with-format::zip']
 			   end,
+        % Is it a erlang.mk plugin ?
+        % Check there is both erlang.mk and plugins.mk files
+		P = case (filelib:is_regular(filename:join(Path, "erlang.mk")) and 
+			  filelib:is_regular(filename:join(Path, "plugins.mk"))) of
+			  true  -> ['role::plugin'] ;
+			  false -> [] 
+		    end,        
         % Result
-		C ++ Cpp ++ E ++ Java ++ Json ++ XML ++ XSL ++ Zip.
+		C ++ Cpp ++ E ++ Java ++ Json ++ XML ++ XSL ++ Zip ++ P.
 
 %%-------------------------------------------------------------------------
 %% @doc Hooks on first Results
@@ -243,12 +251,19 @@ hooks(T, I, {_PE, PC}, {DE, _DC}) ->
 		   	NC = ?EXIST('network::client', T),
 		   	NS = ?EXIST('network::server', T),
 
-	   		{description, Desc} = lists:keyfind(description, 1, I),
+	   		Desc = case lists:keyfind(description, 1, I) of
+						{description, undefined} -> "";
+						{description, Desc0} -> Desc0
+				   end,
+						
+			Tokens = string:tokens(Desc," "),
+		    Toks = lists:flatmap(fun(X) -> [string:to_lower(X)] end, Tokens),
+			DescC = (NC and (lists:member("client", Toks) or lists:member("client.", Toks))),
+			DescS = (NS and (lists:member("server", Toks) or lists:member("server.", Toks))) ,
             % Analyse description
 			D= case Desc of 
-				 undefined ->  [] ;	
-				 _ -> Tokens = string:tokens(Desc," "),
-		    		  Toks = lists:flatmap(fun(X) -> [string:to_lower(X)] end, Tokens),
+				 undefined -> [] ;	
+				 _ -> 			
 		    		  PH = case lists:member("http", Toks) of
 							true -> ['protocol::http'] ;
 							false -> []
@@ -263,20 +278,20 @@ hooks(T, I, {_PE, PC}, {DE, _DC}) ->
 		   	% If both network::client and network::server, 
 		   	% try to discriminate otherwise remove both instead giving wrong infos		
 			% If there is 'connect' in parent calls and in deps exports, it is a client
-			Client  = (lists:keymember(connect, 2, PC) and lists:keymember(connect, 2, DE)),
+			Client  = ((lists:keymember(connect, 2, PC) and lists:keymember(connect, 2, DE)) or DescC),
 			% If there is 'listen'  in parent calls and in deps exports, it is a server
-			Server  = (lists:keymember(listen, 2, PC) and lists:keymember(listen, 2, DE)),
-		   	H= case (NC and NS) of	
-				true -> 
-						case (Client and Server) of
-							true -> T ;
+			Server  = ((lists:keymember(listen, 2, PC) and lists:keymember(listen, 2, DE)) or DescS),
+
+		   	H= case (NC or NS) of	
+				true -> case (Client and Server) of
+							true  -> T ;
 							false -> case Client of
 										true  -> % remove Server
-												 T -- ['network::server'] ;
+												 lists:usort(T) -- ['network::server'] ;
 										false -> % remove Client
 												 case Server of
-													true  -> T -- ['network::client'] ;
-													false -> T -- ['network::server', 'network::client']
+													true  -> lists:usort(T) -- ['network::client'] ;
+													false -> lists:usort(T) -- ['network::server', 'network::client']
 												 end
 									 end
 						end;

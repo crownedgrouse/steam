@@ -5,6 +5,7 @@
 tags('scope::suite', 'erlang-mk') -> 'erlang::otp:suite' ;
 tags('implemented-in::c', 'erlang-mk') -> 'erlang::driver:c' ;
 tags('implemented-in::c++', 'erlang-mk') -> 'erlang::driver:c++' ;
+tags('role::shared-lib', 'erlang-mk') -> 'erlang::library' ;
 
 tags('interface::daemon', 'erlang-mk') -> 
 	% depending geas type
@@ -51,6 +52,14 @@ tags(Path, Mode)
 	 when is_list(Path),
 		  is_atom(Mode) -> % Call usual tagging
 						   case tags(Path) of
-								{error, R}    -> {error, R} ;
-								{ok, Debtags} -> {ok, lists:usort(lists:flatten(lists:flatmap(fun(X) -> [tags(X, Mode)] end, Debtags)))}
+								{error, R}     -> {error, R} ;
+								{ok, Debtags0} -> Debtags = case (filelib:is_regular(filename:join(Path, "erlang.mk")) and 
+			  											          filelib:is_regular(filename:join(Path, "plugins.mk"))) of
+			  															true  -> ['plugin::erlang-mk'] ++ lists:delete('role::plugin', Debtags0);
+			  															false -> Debtags0 
+		    									 			end, 
+												Transco = lists:flatmap(fun(X) -> [tags(X, Mode)] end, Debtags),
+												Rels = lists:flatmap(fun(X) -> [list_to_atom("erlang::version:" ++ X)] end, geas:w2l(geas:compat(Path, global))),
+												{ok, lists:usort(lists:flatten(Transco ++ Rels))}
 						   end.
+
