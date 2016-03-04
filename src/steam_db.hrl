@@ -10,10 +10,12 @@
 -define(Interface, ['interface::commandline', 'interface::daemon']).
 -define(Implemented_in, ['implemented-in::c', 'implemented-in::c++', 
                          'implemented-in::erlang', 'implemented-in::java']).
--define(Works_with, []).
+-define(Works_with, ['works-with::db', 'works-with::dictionary', 
+                     'works-with::file', 'works-with::graphs', 
+                     'works-with::logfile']).
 -define(Works_with_format,[]).
 -define(Scope, ['scope::suite', 'scope::utility', 'scope::application']).
--define(Role, ['role::program']).
+-define(Role, ['role::program','role::plugin','role::shared-lib']).
 -define(Special, []).
 -define(Protocol, ['protocol::corba' , 'protocol::db:mysql', 'protocol::db:psql',
 				   'protocol::ftp' , 'protocol::http' , 
@@ -23,7 +25,7 @@
                    'protocol::udp']).
 -define(Uitoolkit,['uitoolkit::wxwidgets']).
 -define(Web,['web::application', 'web::server']).
--define(Network,[]).
+-define(Network,['network::client', 'network::server']).
 
 -spec tags({call | export | application , {atom(), atom(), integer()}}) -> atom() | [].
 %%******************************************************************************
@@ -150,7 +152,7 @@
 
 % Tag: interface::commandline
 % Description: Command Line
-tag({application, _, {type, esc}}) -> 'interface::commandline' ;
+tag({application, _, {type, esc}}) -> ['interface::commandline', 'role::program'] ;
 
 % Tag: interface::daemon
 % Description: Daemon
@@ -182,18 +184,25 @@ tag({application, _, {type, app}}) -> 'interface::daemon' ;
 
 % Tag: works-with::db
 % Description: Databases
+tag({call, _, {mnesia, _, _}}) -> 'works-with::db' ;
 
 % Tag: works-with::dictionary
 % Description: Dictionaries
+tag({call, _, {dict, _, _}})          -> 'works-with::dictionary' ;
+tag({call, _, {orddict, _, _}})       -> 'works-with::dictionary' ;
+tag({call, _, {diameter_dict, _, _}}) -> 'works-with::dictionary' ;
 
 % Tag: works-with::file
 % Description: Files
+tag({call, _, {file, _, _}}) -> 'works-with::file' ;
 
 % Tag: works-with::graphs
 % Description: Trees and Graphs
+tag({call, _, {digraph, _, _}}) -> 'works-with::graphs' ;
 
 % Tag: works-with::logfile
 % Description: System Logs
+tag({call, _, {error_logger, _, _}}) -> 'works-with::logfile' ;
 
 % Tag: works-with::network-traffic
 % Description: Network Traffic
@@ -251,7 +260,8 @@ tag({export, Name, {Name, do, 1}})   -> 'role::plugin' ;
 % Tag: role::program
 % Description: Program
 %  Executable computer program.
-% NOTE : OTP and non OTP application
+% NOTE : escripts
+% tag({application, _, {type, esc}}) -> 'role::program' ; % See 'interface::commandline'
 
 % Tag: role::shared-lib
 % Description: Shared Library
