@@ -5,7 +5,17 @@
 %%% Steam database for facet 'use'
 %%% @end 
 
--define(Use,['use::analysing', 'use::converting', 'use::organizing']).
+-define(Use,['use::analysing', 'use::browsing', 'use::calculating', 
+			 'use::chatting', 'use::checking', 'use::comparing', 
+             'use::compressing', 'use::configuring', 'use::converting',
+             'use::dialing', 'use::downloading', 'use::driver', 'use::editing',
+             'use::entertaining', 'use::filtering', 'use::gameplaying',
+			 'use::learning', 'use::login', 'use::measuring', 'use::monitor',
+             'use::organizing', 'use::playing', 'use::printing', 'use::proxying',
+             'use::routing', 'use::searching', 'use::scanning', 'use::simulating',
+             'use::storing', 'use::synchronizing', 'use::timekeeping', 
+             'use::transmission', 'use::typesetting', 'use::viewing', 
+             'use::text-formatting']).
 
 %%******************************************************************************
 %% Facet: use

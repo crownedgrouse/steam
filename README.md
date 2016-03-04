@@ -15,9 +15,25 @@ This subjective facet cannot be detected for now and to be declared by projects 
 
 Contributions are welcome. Please use pull-requests.
 
+### In steam project ###
 Facet `use` (The general purpose of the software) is to be informed by Erlang projects maintainer in `src/steam_use.hrl`. 
 
 Note : only pull requests coming from owner of project will be accepted for this facet `use`.
+
+### In your own project ###
+Alternatively, and prefered way, you can tune steam tags by adding attribute in your own project code.
+
+Simply add a `steam` attribute in top of your main project file, as a list containing optional tuples :
+
+- Tuple `tag` contains a list of tags to add to steam analyze. Note that _ALL_ tags must already exists in steam project or none will be added.
+You can verify this by getting the whole list with `steam:tags()` function.
+- Tuple `untag` contains a list of tags to remove from steam analyze. This should be used only to repair a false positive until a fix in steam code is done.
+
+```
+-steam([{tag,['use::analysing']}, % Add tag(s) (must ALL exists)
+		{untag,[]}                % Remove any unwanted tag(s)
+	   ]).
+```
 
 ## API ##
 

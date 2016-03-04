@@ -1,6 +1,6 @@
 %%%-------------------------------------------------------------------
 %%% File:      steam.erl
-%%% @author    Eric Pailleau <geas@crownedgrouse.com>
+%%% @author    Eric Pailleau <steam@crownedgrouse.com>
 %%% @copyright 2016 crownedgrouse.com
 %%% @doc  
 %%% Search Tags in Erlang Application or Module
@@ -24,8 +24,8 @@
 %%%-------------------------------------------------------------------
 -module(steam).
 -author("Eric Pailleau <steam@crownedgrouse.com>").
--steam([{tag,['use::analysing']},
-		{untag,[]}
+-steam([{tag,['use::analysing']}, % Add tag(s) (must ALL exists)
+		{untag,[]}                % Remove any unwanted tag(s)
 	   ]).
 
 -export([facets/0, facets/1, tags/0, tags/1]).
@@ -117,13 +117,34 @@ tags(Path) ->
 		TDE = lists:flatmap(fun(X) -> [tag({export, deps, X})] end, DE),
 
         % Search tags from other geas information
-        TA = [tag({application, Name, []}),
+        GTA = [tag({application, Name, []}),
 				   tag({application, Name, {type, Type}}),
 				   implemented_in(Path),
 				   use(Name)
 		     ],		
-		% Unique Iults
-		{ok, lists:usort(hooks(lists:flatten([TPC] ++ [TPE] ++ [TDC] ++ [TDE] ++ [TA]), I, {PE, PC}, {DE, DC}))}
+		% Unique Results
+		% Get steam attribute if existing
+        ATs = case lists:keyfind(steam, 1 , get(geas_attributes)) of
+			 		{steam, Ats} -> Ats ;
+			 		false -> []
+			  end,
+		% Add tag from owner code attribute
+		OAT = case lists:keyfind(tag, 1 , ATs) of
+					{tag, Oat } -> % Verify it is a valid tag
+								   Alltags = tags(),
+								   case lists:all(fun(X) -> lists:member(X, Alltags) end, Oat) of
+										true  -> Oat ;
+										false -> []
+								   end;
+					false       -> []
+			  end,
+		% Remove tag from owner code attribute
+		ORT = case lists:keyfind(untag, 1 , ATs) of
+					{untag, Ort } -> Ort;
+					false         -> []
+			  end,
+		Base = lists:flatten([TPC] ++ [TPE] ++ [TDC] ++ [TDE] ++ [GTA]),
+		{ok, lists:usort(lists:flatten((hooks(Base, I, {PE, PC}, {DE, DC}) ++ OAT) -- ORT))}
 	catch 
     	throw:Term -> Term;
     	exit:Reason -> {error, Reason} ;
