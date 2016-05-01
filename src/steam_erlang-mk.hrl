@@ -55,11 +55,11 @@ tags(Path, Mode)
 								{error, R}     -> {error, R} ;
 								{ok, Debtags0} -> Debtags = case (filelib:is_regular(filename:join(Path, "erlang.mk")) and 
 			  											          filelib:is_regular(filename:join(Path, "plugins.mk"))) of
-			  															true  -> ['plugin::erlang-mk'] ++ lists:delete('role::plugin', Debtags0);
+			  															true  -> ['plugin::erlang-mk'] ++ Debtags0 ;
 			  															false -> Debtags0 
 		    									 			end, 
 												Transco = lists:flatmap(fun(X) -> [tags(X, Mode)] end, Debtags),
 												Rels = lists:flatmap(fun(X) -> [list_to_atom("erlang::version:" ++ X)] end, geas:w2l(geas:compat(Path, global))),
-												{ok, lists:usort(lists:flatten(Transco ++ Rels))}
+												{ok, lists:usort(lists:flatten(lists:delete('role::plugin', Transco) ++ Rels))}
 						   end.
 
