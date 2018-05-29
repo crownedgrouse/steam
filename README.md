@@ -6,7 +6,7 @@ Search Tags in Erlang Application or Module
 
 Debian package tags are used because of their completeness compared to many other distributions. However those tags can be easily transcoded to anothers if needed.
 
-Reference is [Debtags](http://anonscm.debian.org/cgit/debtags/vocabulary.git/tree/debian-packages).
+Reference is [Debtags](https://debtags.debian.org/reports/facets).
 
 All relevant tags for Erlang projects are automatically detected from abstract code, except tags of facet `use`.
 This subjective facet cannot be detected for now and to be declared by projects maintainers.
@@ -53,7 +53,7 @@ Returns `{ok, ListOfTags}` or `{error, Reason}`.
 ```
 
 ### Listing facets ###
-Debian tag classification use [Facets](https://en.wikipedia.org/wiki/Faceted_classification).
+Debian tag classification use [Facets](https://debtags.debian.org/reports/facets).
 
 Listing facets used in tags : `steam:facets().`
 
